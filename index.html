@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Komisi Pemilihan OSIS - UPTD SPF SMP NEGERI 4 BONDOWOSO</title>
+    <!-- Google Fonts, Canvas Confetti & SheetJS (Excel Parser) -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-yellow: #f59e0b;
+            --accent-cyan: #06b6d4;
+            --accent-pink: #ec4899;
+            --accent-green: #10b981;
+            --text-light: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Navigation */
+        header {
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--accent-cyan);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: var(--accent-yellow);
+            text-shadow: 2px 2px #000;
+        }
+
+        .sub-logo {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #94a3b8;
+            letter-spacing: 1px;
+        }
+
+        nav button {
+            background: transparent;
+            border: 2px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 0.5rem 1rem;
+            margin-left: 0.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        nav button:hover, nav button.active {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .container {
+            max-width: 1250px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .arcade-btn {
+            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 800;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #047857;
+            transition: all 0.1s;
+            text-transform: uppercase;
+        }
+
+        .arcade-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #047857;
+        }
+
+        /* LOGIN PAGE */
+        .login-card {
+            background: var(--card-bg);
+            max-width: 480px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 3px solid var(--accent-pink);
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+            text-align: center;
+        }
+
+        .login-card h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: var(--accent-pink);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 2px solid #334155;
+            background: #0f172a;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        /* VOTING PAGE */
+        .voting-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .voting-header h1 {
+            font-family: 'Press Start 2P', cursive;
+            color: var(--accent-yellow);
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .candidate-card {
+            background: var(--card-bg);
+            border: 3px solid #334155;
+            border-radius: 24px;
+            overflow: hidden;
+            text-align: center;
+            padding: 1.8rem;
+            transition: all 0.3s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .candidate-card:hover {
+            border-color: var(--accent-yellow);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(245, 158, 11, 0.3);
+        }
+
+        .candidate-num {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: var(--accent-yellow);
+            color: #000;
+            font-family: 'Press Start 2P', cursive;
+            padding: 0.5rem 0.9rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            z-index: 2;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .candidate-img-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .candidate-img {
+            width: 240px;
+            height: 240px;
+            border-radius: 20px;
+            border: 5px solid var(--accent-cyan);
+            object-fit: cover;
+            background: #0f172a;
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+            transition: transform 0.3s ease;
+        }
+
+        .candidate-card:hover .candidate-img {
+            transform: scale(1.03);
+            border-color: var(--accent-yellow);
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.5);
+        }
+
+        .candidate-slogan {
+            background: linear-gradient(90deg, rgba(245,158,11,0.2), rgba(236,72,153,0.2));
+            color: var(--accent-yellow);
+            font-weight: 700;
+            font-style: italic;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            margin: 0.5rem auto 1rem auto;
+            border: 1px dashed var(--accent-yellow);
+            display: inline-block;
+        }
+
+        .candidate-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.2rem;
+        }
+
+        .candidate-subtitle {
+            font-size: 0.95rem;
+            color: var(--accent-cyan);
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .candidate-visi {
+            font-size: 0.88rem;
+            color: #94a3b8;
+            margin-bottom: 1.5rem;
+            min-height: 60px;
+            text-align: justify;
+            background: #0f172a;
+            padding: 1rem;
+            border-radius: 12px;
+            border-left: 3px solid var(--accent-cyan);
+        }
+
+        /* ADMIN & SETTINGS */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .admin-grid { grid-template-columns: 1fr; }
+        }
+
+        .admin-section {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid #334155;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-section h3 {
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+            font-size: 0.85rem;
+        }
+
+        th { color: var(--accent-yellow); }
+
+        .badge {
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-guru { background: #8b5cf6; color: white; }
+        .badge-siswa { background: #3b82f6; color: white; }
+        .badge-sudah { background: #10b981; color: white; }
+        .badge-belum { background: #ef4444; color: white; }
+
+        .stats-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-cyan);
+            text-align: center;
+        }
+
+        .stat-box h4 { font-size: 0.8rem; color: #94a3b8; }
+        .stat-box p { font-size: 1.5rem; font-weight: 800; color: var(--text-light); }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 3px solid var(--accent-yellow);
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+        }
+
+        .excel-template-btn {
+            background: #1d4ed8;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="header-title">
+            <div class="logo">⚡ KOMISI PEMILIHAN OSIS</div>
+            <div class="sub-logo">UPTD SPF SMP NEGERI 4 BONDOWOSO</div>
+        </div>
+        <nav>
+            <button id="btn-nav-vote" class="active" onclick="switchPage('page-login')">Bilik Suara</button>
+            <button id="btn-nav-admin" onclick="switchPage('page-admin')">🔒 Pengaturan & Hasil</button>
+        </nav>
+    </header>
+
+    <div class="container">
+
+        <!-- 1. LOGIN SUARA -->
+        <div id="page-login" class="page active">
+            <div class="login-card">
+                <h2>PLAYER LOGIN</h2>
+                <p style="color: var(--accent-cyan); font-weight: 600; font-size: 0.85rem; margin-top: 0.3rem;">UPTD SPF SMP NEGERI 4 BONDOWOSO</p>
+                <p style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">Masukkan NISN / NIP / Kode Unik Anda untuk masuk ke bilik suara!</p>
+                <form id="form-login" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="voter-id">NISN / NIP / Kode Unik Pemilih</label>
+                        <input type="text" id="voter-id" placeholder="Contoh: SISWA01 / GURU01" required>
+                    </div>
+                    <button type="submit" class="arcade-btn" style="width: 100%;">START GAME (PILIH)</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. PILIH PASLON (GAME STYLE) -->
+        <div id="page-voting" class="page">
+            <div class="voting-header">
+                <h1>CHOOSE YOUR LEADER!</h1>
+                <p style="color: #94a3b8;">Selamat Datang di Pemilihan Ketua & Wakil Ketua OSIS, <span id="voter-name-display" style="color: var(--accent-cyan); font-weight: bold;"></span>!</p>
+            </div>
+
+            <div class="candidates-grid" id="candidates-container">
+                <!-- Paslon Cards Injected Dynamically -->
+            </div>
+        </div>
+
+        <!-- 3. PENGATURAN PASLON & DPT (HANYA BISA DIBUKA ADMIN) -->
+        <div id="page-admin" class="page">
+            <div class="stats-container">
+                <div class="stat-box">
+                    <h4>Total DPT</h4>
+                    <p id="stat-total">0</p>
+                </div>
+                <div class="stat-box" style="border-color: var(--accent-green);">
+                    <h4>Sudah Memilih</h4>
+                    <p id="stat-sudah">0</p>
+                </div>
+                <div class="stat-box" style="border-color: var(--accent-pink);">
+                    <h4>Belum Memilih</h4>
+                    <p id="stat-belum">0</p>
+                </div>
+            </div>
+
+            <div class="admin-grid">
+                <!-- Pengaturan Paslon, Slogan & Foto -->
+                <div class="admin-section">
+                    <h3>👥 Pengaturan Paslon & Slogan</h3>
+                    <form id="form-candidate" onsubmit="handleAddOrUpdateCandidate(event)">
+                        <div class="form-group">
+                            <label>Nomor Urut Paslon</label>
+                            <input type="number" id="cand-no" placeholder="Contoh: 1" required min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Calon Ketua OSIS</label>
+                            <input type="text" id="cand-ketua" placeholder="Nama Ketua" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Calon Wakil Ketua OSIS</label>
+                            <input type="text" id="cand-wakil" placeholder="Nama Wakil" required>
+                        </div>
+                        <div class="form-group">
+                            <label>🔥 Kata-Kata Penyemangat / Slogan Kampanye</label>
+                            <input type="text" id="cand-slogan" placeholder="Contoh: Bekerja Nyata, OSIS Hebat!" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Visi & Misi Ringkas</label>
+                            <textarea id="cand-visi" rows="2" placeholder="Visi dan misi paslon..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Foto Paslon (File Gambar)</label>
+                            <input type="file" id="cand-foto" accept="image/*">
+                        </div>
+                        <button type="submit" class="arcade-btn" style="width: 100%; background: linear-gradient(180deg, #06b6d4 0%, #0284c7 100%);">Simpan Paslon</button>
+                    </form>
+                </div>
+
+                <!-- Import DPT Excel/CSV & Manual -->
+                <div class="admin-section">
+                    <h3>📥 Import DPT Kolektif (Excel / CSV)
+                        <button type="button" class="excel-template-btn" onclick="downloadTemplate()">Download Format Excel</button>
+                    </h3>
+                    <div class="form-group">
+                        <label>Pilih File Excel (.xlsx / .xls / .csv)</label>
+                        <input type="file" id="excel-file" accept=".xlsx, .xls, .csv">
+                    </div>
+                    <button type="button" onclick="importExcelDPT()" class="arcade-btn" style="width: 100%; margin-bottom: 1.5rem; background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);">Import Data Excel</button>
+
+                    <h4 style="color: var(--accent-yellow); margin-bottom: 0.5rem; font-size: 0.9rem;">+ Tambah Manual Satuan</h4>
+                    <form id="form-add-dpt" onsubmit="handleAddDpt(event)">
+                        <div class="form-group">
+                            <label>NISN / NIP / ID</label>
+                            <input type="text" id="add-id" placeholder="Contoh: 10023" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Lengkap</label>
+                            <input type="text" id="add-nama" placeholder="Contoh: Budi Santoso" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Kategori</label>
+                            <select id="add-tipe">
+                                <option value="Siswa">Siswa</option>
+                                <option value="Guru">Tenaga Pendidik / Guru</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="arcade-btn" style="width: 100%; font-size: 0.85rem;">+ Tambahkan Pemilih</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Perolehan Suara Leaderboard -->
+            <div class="admin-section">
+                <h3>🏆 Leaderboard Perolehan Suara - KPO SMPN 4 BONDOWOSO</h3>
+                <div id="leaderboard-container"></div>
+            </div>
+
+            <!-- Tabel DPT Kompleks -->
+            <div class="admin-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <h3>📋 Daftar Pemilih Tetap (DPT) Guru & Siswa</h3>
+                    <button onclick="resetData()" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 0.4rem 0.8rem; border-radius: 8px; cursor: pointer; font-size: 0.8rem;">⚠️ Reset Semua Data Voting</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>NISN / NIP</th>
+                                <th>Nama Lengkap</th>
+                                <th>Kategori</th>
+                                <th>Status Suara</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dpt-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Konfirmasi Vote -->
+    <div id="vote-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color: var(--accent-yellow); font-family: 'Press Start 2P', cursive; font-size: 0.9rem; margin-bottom: 1rem;">KONFIRMASI PILIHAN</h2>
+            <p id="modal-text" style="margin-bottom: 1.5rem;">Apakah Anda yakin ingin memilih pasangan ini?</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button onclick="closeModal()" style="padding: 0.6rem 1.2rem; background: #475569; border: none; color: white; border-radius: 8px; cursor: pointer;">Batal</button>
+                <button id="btn-confirm-vote" class="arcade-btn">YAKIN & VOTE!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const ADMIN_PIN = "1723"; // Password khusus Admin
+
+        const defaultCandidates = [
+            { 
+                id: 1, 
+                ketua: "Andi Saputra", 
+                wakil: "Sita Nurhaliza", 
+                slogan: "⚡ Bersama Kita Beraksi, Ciptakan Prestasi!",
+                vision: "Mewujudkan sekolah berprestasi, kreatif, dan berwawasan lingkungan.", 
+                photo: "", 
+                votes: 0 
+            },
+            { 
+                id: 2, 
+                ketua: "Bima Arya", 
+                wakil: "Dina Kirana", 
+                slogan: "🔥 Suara Muda, Suara Perubahan Berani!",
+                vision: "Pengembangan bakat e-sports, kesenian, serta transparansi kegiatan siswa.", 
+                photo: "", 
+                votes: 0 
+            }
+        ];
+
+        const defaultDPT = [
+            { id: "SISWA01", name: "Ahmad Rizky", type: "Siswa", hasVoted: false },
+            { id: "GURU01", name: "Dendi Angga Kurniawan, S.Pd.", type: "Guru", hasVoted: false }
+        ];
+
+        let candidates = JSON.parse(localStorage.getItem('pilkasis_candidates')) || defaultCandidates;
+        let dptList = JSON.parse(localStorage.getItem('pilkasis_dpt')) || defaultDPT;
+        let activeVoter = null;
+        let selectedCandidateId = null;
+
+        function switchPage(pageId) {
+            // VERIFIKASI PASSWORD UNTUK AKSES ADMIN
+            if (pageId === 'page-admin') {
+                const inputPin = prompt("🔒 Masukkan Password Admin untuk mengakses Pengaturan & Hasil:");
+                if (inputPin !== ADMIN_PIN) {
+                    alert("❌ Password Salah! Akses ditolak.");
+                    return;
+                }
+            }
+
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(pageId).classList.add('active');
+            if (pageId === 'page-login') document.getElementById('btn-nav-vote').classList.add('active');
+            if (pageId === 'page-admin') {
+                document.getElementById('btn-nav-admin').classList.add('active');
+                renderAdminView();
+            }
+        }
+
+        // LOGIN & VOTING
+        function handleLogin(e) {
+            e.preventDefault();
+            const inputId = document.getElementById('voter-id').value.trim();
+            const voter = dptList.find(d => d.id.toLowerCase() === inputId.toLowerCase());
+
+            if (!voter) {
+                alert("❌ NISN/NIP/Kode Unik tidak terdaftar di DPT! Hubungi Panitia KPO.");
+                return;
+            }
+
+            if (voter.hasVoted) {
+                alert("⚠️ Anda telah menggunakan hak suara sebelumnya!");
+                return;
+            }
+
+            activeVoter = voter;
+            document.getElementById('voter-name-display').innerText = `${voter.name} (${voter.type})`;
+            renderCandidates();
+            switchPage('page-voting');
+        }
+
+        function renderCandidates() {
+            const container = document.getElementById('candidates-container');
+            container.innerHTML = '';
+
+            candidates.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'candidate-card';
+                
+                const imgSrc = c.photo || `https://api.dicebear.com/7.x/bottts/svg?seed=paslon${c.id}`;
+                const sloganTxt = c.slogan || "⚡ Bersama Kita BISA!";
+
+                card.innerHTML = `
+                    <div>
+                        <div class="candidate-num">0${c.id}</div>
+                        <div class="candidate-img-wrapper">
+                            <img src="${imgSrc}" class="candidate-img" alt="Paslon 0${c.id}">
+                        </div>
+                        <div class="candidate-slogan">"${sloganTxt}"</div>
+                        <div class="candidate-title">${c.ketua}</div>
+                        <div class="candidate-subtitle">& ${c.wakil}</div>
+                        <div class="candidate-visi">"${c.vision}"</div>
+                    </div>
+                    <button class="arcade-btn" style="width: 100%;" onclick="openVoteModal(${c.id})">PILIH CANDIDATE</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openVoteModal(candidateId) {
+            selectedCandidateId = candidateId;
+            const cand = candidates.find(c => c.id === candidateId);
+            document.getElementById('modal-text').innerText = `Anda akan memilih Paslon 0${cand.id}: ${cand.ketua} & ${cand.wakil}`;
+            document.getElementById('vote-modal').style.display = 'flex';
+            document.getElementById('btn-confirm-vote').onclick = executeVote;
+        }
+
+        function closeModal() {
+            document.getElementById('vote-modal').style.display = 'none';
+        }
+
+        function executeVote() {
+            if (!activeVoter || selectedCandidateId === null) return;
+
+            const voterIndex = dptList.findIndex(d => d.id === activeVoter.id);
+            dptList[voterIndex].hasVoted = true;
+
+            const candidateIndex = candidates.findIndex(c => c.id === selectedCandidateId);
+            candidates[candidateIndex].votes += 1;
+
+            saveData();
+
+            confetti({
+                particleCount: 120,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+
+            closeModal();
+            alert(`🎉 Hak suara atas nama ${activeVoter.name} berhasil disimpan di KPO UPTD SPF SMP NEGERI 4 BONDOWOSO!`);
+            
+            activeVoter = null;
+            document.getElementById('voter-id').value = '';
+            switchPage('page-login');
+        }
+
+        // PENGATURAN PASLON, SLOGAN & FOTO
+        function handleAddOrUpdateCandidate(e) {
+            e.preventDefault();
+            const no = parseInt(document.getElementById('cand-no').value);
+            const ketua = document.getElementById('cand-ketua').value.trim();
+            const wakil = document.getElementById('cand-wakil').value.trim();
+            const slogan = document.getElementById('cand-slogan').value.trim();
+            const vision = document.getElementById('cand-visi').value.trim();
+            const photoInput = document.getElementById('cand-foto');
+
+            const processSave = (photoBase64) => {
+                const existingIdx = candidates.findIndex(c => c.id === no);
+                if (existingIdx >= 0) {
+                    candidates[existingIdx].ketua = ketua;
+                    candidates[existingIdx].wakil = wakil;
+                    candidates[existingIdx].slogan = slogan;
+                    candidates[existingIdx].vision = vision;
+                    if (photoBase64) candidates[existingIdx].photo = photoBase64;
+                } else {
+                    candidates.push({
+                        id: no,
+                        ketua: ketua,
+                        wakil: wakil,
+                        slogan: slogan,
+                        vision: vision,
+                        photo: photoBase64 || "",
+                        votes: 0
+                    });
+                }
+
+                candidates.sort((a, b) => a.id - b.id);
+                saveData();
+                alert(`✅ Paslon 0${no} beserta foto & slogan berhasil disimpan!`);
+                document.getElementById('form-candidate').reset();
+                renderAdminView();
+            };
+
+            if (photoInput.files && photoInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    processSave(e.target.result);
+                };
+                reader.readAsDataURL(photoInput.files[0]);
+            } else {
+                const existing = candidates.find(c => c.id === no);
+                processSave(existing ? existing.photo : "");
+            }
+        }
+
+        // EXCEL IMPORT & DPT
+        function downloadTemplate() {
+            const templateData = [
+                ["NIS/NIP", "Nama", "Kategori"],
+                ["1001", "Budi Santoso", "Siswa"],
+                ["19850101", "Dendi Angga Kurniawan, S.Pd.", "Guru"]
+            ];
+            const ws = XLSX.utils.aoa_to_sheet(templateData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "DPT_SMPN4");
+            XLSX.writeFile(wb, "Template_DPT_SMPN4_Bondowoso.xlsx");
+        }
+
+        function importExcelDPT() {
+            const fileInput = document.getElementById('excel-file');
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert("⚠️ Silakan pilih berkas Excel terlebih dahulu!");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json(sheet);
+
+                let addedCount = 0;
+                json.forEach(row => {
+                    const id = String(row["NIS/NIP"] || row["NISN"] || row["ID"] || "").trim();
+                    const name = String(row["Nama"] || row["Nama Lengkap"] || "").trim();
+                    let type = String(row["Kategori"] || row["Tipe"] || "Siswa").trim();
+                    
+                    if (type.toLowerCase().includes("guru") || type.toLowerCase().includes("pendidik")) {
+                        type = "Guru";
+                    } else {
+                        type = "Siswa";
+                    }
+
+                    if (id && name && !dptList.some(d => d.id.toLowerCase() === id.toLowerCase())) {
+                        dptList.push({ id, name, type, hasVoted: false });
+                        addedCount++;
+                    }
+                });
+
+                saveData();
+                renderAdminView();
+                alert(`🎉 Berhasil mengimpor ${addedCount} data DPT ke KPO SMPN 4 Bondowoso!`);
+                fileInput.value = '';
+            };
+            reader.readAsArrayBuffer(fileInput.files[0]);
+        }
+
+        function handleAddDpt(e) {
+            e.preventDefault();
+            const id = document.getElementById('add-id').value.trim();
+            const nama = document.getElementById('add-nama').value.trim();
+            const tipe = document.getElementById('add-tipe').value;
+
+            if (dptList.some(d => d.id.toLowerCase() === id.toLowerCase())) {
+                alert("❌ NISN/NIP sudah terdaftar!");
+                return;
+            }
+
+            dptList.push({ id, name: nama, type: tipe, hasVoted: false });
+            saveData();
+            renderAdminView();
+
+            document.getElementById('add-id').value = '';
+            document.getElementById('add-nama').value = '';
+            alert("✅ Pemilih berhasil ditambahkan!");
+        }
+
+        function deleteDpt(id) {
+            if (confirm(`Hapus pemilih dengan ID ${id}?`)) {
+                dptList = dptList.filter(d => d.id !== id);
+                saveData();
+                renderAdminView();
+            }
+        }
+
+        // ADMIN VIEW RENDER
+        function renderAdminView() {
+            const total = dptList.length;
+            const sudah = dptList.filter(d => d.hasVoted).length;
+            const belum = total - sudah;
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-sudah').innerText = sudah;
+            document.getElementById('stat-belum').innerText = belum;
+
+            // Render Table DPT
+            const tbody = document.getElementById('dpt-table-body');
+            tbody.innerHTML = '';
+            dptList.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${d.id}</strong></td>
+                    <td>${d.name}</td>
+                    <td><span class="badge ${d.type === 'Guru' ? 'badge-guru' : 'badge-siswa'}">${d.type}</span></td>
+                    <td><span class="badge ${d.hasVoted ? 'badge-sudah' : 'badge-belum'}">${d.hasVoted ? 'Sudah Memilih' : 'Belum Memilih'}</span></td>
+                    <td><button onclick="deleteDpt('${d.id}')" style="background: #ef4444; border: none; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; cursor: pointer;">Hapus</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Render Leaderboard
+            const lbContainer = document.getElementById('leaderboard-container');
+            lbContainer.innerHTML = '';
+            candidates.forEach(c => {
+                const percentage = sudah > 0 ? ((c.votes / sudah) * 100).toFixed(1) : 0;
+                lbContainer.innerHTML += `
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.3rem;">
+                            <span><strong>Paslon 0${c.id}: ${c.ketua} & ${c.wakil}</strong></span>
+                            <span>${c.votes} Suara (${percentage}%)</span>
+                        </div>
+                        <div style="background: #0f172a; border-radius: 10px; height: 14px; overflow: hidden;">
+                            <div style="background: var(--accent-yellow); height: 100%; width: ${percentage}%; transition: width 0.5s;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function saveData() {
+            localStorage.setItem('pilkasis_candidates', JSON.stringify(candidates));
+            localStorage.setItem('pilkasis_dpt', JSON.stringify(dptList));
+        }
+
+        function resetData() {
+            // VERIFIKASI KONFIRMASI TAMBAHAN PIN
+            const verifyPin = prompt("⚠️ Masukkan Password Admin (1723) untuk konfirmasi reset:");
+            if (verifyPin !== ADMIN_PIN) {
+                alert("❌ Password Salah! Reset dibatalkan.");
+                return;
+            }
+
+            localStorage.removeItem('pilkasis_candidates');
+            localStorage.removeItem('pilkasis_dpt');
+            candidates = defaultCandidates;
+            dptList = defaultDPT;
+            saveData();
+            renderAdminView();
+            alert("Data berhasil direset!");
+        }
+    </script>
+</body>
+</html>
